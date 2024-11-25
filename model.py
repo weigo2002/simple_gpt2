@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from parso.python.tree import Class
 
 class GPTModel(nn.Module):
     def __init__(self, cfg):
