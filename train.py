@@ -1,6 +1,5 @@
 import tiktoken
 import torch
-from tinycss2 import tokenizer
 
 from data import create_datalaoder
 from evaluation import calc_loss_batch, evaluate_model
