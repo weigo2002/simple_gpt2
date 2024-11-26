@@ -8,14 +8,15 @@ class GPTModel(nn.Module):
         self.pos_emb = nn.Embedding(cfg["context_length"], cfg["emb_dim"])
         self.drop_emb = nn.Dropout(cfg["drop_rate"])
         self.trf_blocks = nn.Sequential(
-            *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
+            *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])]
+        )
         self.final_norm = LayerNorm(cfg["emb_dim"])
         self.output_head = nn.Linear(cfg["emb_dim"], cfg["vocab_size"], bias=False)
 
     def forward(self, in_idx):
         batch_size, seq_len = in_idx.shape
         tok_embeds = self.token_emb(in_idx)
-        pos_embeds = self.pos_emb(in_idx)
+        pos_embeds = self.pos_emb(torch.arange(seq_len, device=in_idx.device))
         x = tok_embeds + pos_embeds
         x = self.drop_emb(x)
         x = self.trf_blocks(x)
@@ -39,7 +40,7 @@ class MultiHeadAttention(nn.Module):
         self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
         self.out_proj = nn.Linear(d_out, d_out)
         self.dropout = nn.Dropout(dropout)
-        self.register_buffer('mask', torch.tril(torch.ones(context_length, context_length), diagonal=1))
+        self.register_buffer('mask', torch.triu(torch.ones(context_length, context_length), diagonal=1))
 
     def forward(self, x):
         b, num_tokens, d_in = x.shape
